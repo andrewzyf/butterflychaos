@@ -1,0 +1,12 @@
+id,role,type,description,size/ratio,style line ref,source
+env-kitchen-set,floor-odd environment props,procedural-3d,kitchen props: island counters plates cereal boxes blender pots gas canister,relative to room 16x8x12,STYLE FORMULA v1,generate
+env-office-set,floor-even environment props,procedural-3d,office props: cubicle dividers monitors chairs water cooler filing cabinets paper stacks aerosol cans,relative to room 16x8x12,STYLE FORMULA v1,generate
+item-bowling-ball,trigger item mesh,procedural-3d,greased red bowling ball sphere,0.9 units dia,STYLE FORMULA v1,generate
+item-rc-car,trigger item mesh,procedural-3d,red rocket rc car with chrome nose,0.8 units long,STYLE FORMULA v1,generate
+item-magnet,trigger item mesh,procedural-3d,chrome and red singularity magnet horseshoe on base,0.8 units tall,STYLE FORMULA v1,generate
+item-soda-keg,trigger item mesh,procedural-3d,red soda keg cylinder with chrome bands,0.8 units tall,STYLE FORMULA v1,generate
+fx-shards,debris shard instances,procedural-3d,instanced box shards tinted from parent prop,0.1-0.35 units,STYLE FORMULA v1,generate
+fx-particles,dust spark fire explosion particles,procedural-2d-points,soft round point sprites: grey dust cyan sparks orange fire,canvas 64px sprite,STYLE FORMULA v1,generate
+ui-cards,draft card faces,procedural-html,draft cards for items and modifiers with icon glyph and description,dom,STYLE FORMULA v1,generate
+card-thumbnail,deploy cover,generated-image,kitchen chain reaction cover with title,16:9 1k,STYLE FORMULA v1,generate
+card-favicon,deploy icon,generated-image,glossy red bowling ball icon,1:1 1k,STYLE FORMULA v1,generate

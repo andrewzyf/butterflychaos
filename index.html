@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Butterfly Chaos</title>
+<style>
+:root{
+  --cream:#f7efdd; --paper:#fbf4e6; --tan:#c9a978; --teal:#2fb3ab; --tealDark:#1f8a83;
+  --red:#e2432f; --redDark:#a32d1f; --orange:#ff8a3d; --glow:#ffab2e;
+  --ink:#2b2118; --purple:#8e5bd6;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:#241812;font-family:"Trebuchet MS",Verdana,sans-serif;-webkit-user-select:none;user-select:none;touch-action:none}
+canvas{display:block}
+#dev{position:fixed;top:4px;left:4px;color:#0f0;font:12px monospace;display:none;z-index:60;white-space:pre}
+
+/* ============ shared chunky button ============ */
+.btn{font-family:inherit;cursor:pointer;border:4px solid var(--ink);border-radius:16px;font-weight:900;letter-spacing:.5px;color:var(--ink);background:var(--cream);box-shadow:0 6px 0 var(--ink);transition:transform .08s ease, box-shadow .08s ease}
+.btn:hover{transform:translateY(-3px) rotate(-1deg);box-shadow:0 9px 0 var(--ink)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+
+/* ============ MAIN MENU 30/70 ============ */
+#menuOverlay{position:fixed;inset:0;z-index:30;display:grid;grid-template-columns:minmax(280px,30%) 1fr}
+#menuNav{position:relative;display:flex;flex-direction:column;gap:14px;padding:26px 22px;overflow:auto;
+  background:linear-gradient(165deg, rgba(255,158,74,.94) 0%, rgba(240,90,50,.92) 55%, rgba(190,45,30,.9) 100%);
+  border-right:5px solid var(--ink);box-shadow:8px 0 24px rgba(0,0,0,.35)}
+#logoH{margin:4px 0 0;font-family:"Arial Black","Trebuchet MS",sans-serif;font-size:clamp(34px,3.4vw,52px);line-height:.95;color:var(--cream);
+  transform:rotate(-3deg);letter-spacing:1px;
+  text-shadow:3px 3px 0 var(--ink),6px 6px 0 rgba(43,33,24,.35), -2px -2px 0 var(--teal)}
+#logoH span{color:var(--glow);text-shadow:3px 3px 0 var(--ink),6px 6px 0 rgba(43,33,24,.35),-2px -2px 0 var(--red)}
+#tagH{margin:2px 0 10px;color:var(--cream);font-weight:bold;font-size:13px;transform:rotate(-2deg);text-shadow:1px 2px 0 rgba(43,33,24,.6)}
+.navbtn{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:16px;text-align:left}
+.navbtn .ic{font-size:22px}
+#bestChip{margin-top:auto;background:rgba(43,33,24,.35);border:3px dashed var(--cream);border-radius:14px;padding:10px 12px;color:var(--cream);font-weight:900;font-size:13px;text-align:center}
+#bestChip b{color:var(--glow);font-size:20px;display:block}
+#footNote{color:rgba(247,239,221,.75);font-size:10px;text-align:center;margin-top:8px}
+
+#menuStage{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px;gap:14px;pointer-events:none}
+#custPanel{pointer-events:auto;display:flex;flex-direction:column;gap:10px;align-items:center;background:linear-gradient(180deg, rgba(247,239,221,.9), rgba(233,214,180,.9));border:4px solid var(--ink);border-radius:20px;padding:12px 16px;box-shadow:0 8px 0 var(--ink)}
+#custTitle{font-weight:900;color:var(--ink);font-size:12px;letter-spacing:2px}
+#custRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.c-btn{width:40px;height:40px;border-radius:50%;border:4px solid var(--ink);cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .08s}
+.c-btn:hover{transform:translateY(-3px) scale(1.08)}
+.c-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.c-btn.sel{outline:4px solid var(--cream);outline-offset:2px;transform:scale(1.12)}
+#hatBtn{width:auto;border-radius:14px;padding:0 14px;height:40px;background:var(--teal);color:#fff;font-weight:900;font-size:14px}
+#startBtn{pointer-events:auto;font-size:clamp(24px,3vw,34px);padding:16px 64px;background:var(--red);color:var(--cream);border-radius:22px;
+  text-shadow:2px 2px 0 var(--ink);animation:pulse 1.6s ease-in-out infinite}
+#startBtn:hover{animation-play-state:paused}
+@keyframes pulse{0%,100%{transform:scale(1) rotate(-1deg)}50%{transform:scale(1.05) rotate(1deg)}}
+
+/* ============ MODALS ============ */
+.modalWrap{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(ellipse at 50% 30%, rgba(255,150,70,.28), rgba(40,22,12,.82))}
+.modal{width:min(600px,94vw);max-height:86vh;display:flex;flex-direction:column;background:var(--paper);border:5px solid var(--ink);border-radius:22px;box-shadow:0 12px 0 var(--ink),0 22px 40px rgba(0,0,0,.45);transform:rotate(-.6deg)}
+.modalHead{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:4px solid var(--ink);border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--teal),var(--tealDark));color:#fff}
+.modalHead h2{margin:0;font-size:20px;letter-spacing:1px;text-shadow:2px 2px 0 rgba(43,33,24,.5)}
+.modalClose{width:38px;height:38px;font-size:18px;border-radius:12px;background:var(--red);color:#fff;padding:0}
+.modalBody{padding:14px 20px 20px;overflow-y:auto;color:var(--ink);font-size:14px;line-height:1.5}
+.modalBody h3{margin:16px 0 6px;font-size:17px;color:var(--redDark);border-bottom:3px dotted var(--tan);padding-bottom:4px}
+.modalBody h3:first-child{margin-top:2px}
+.modalBody ul{margin:6px 0;padding-left:6px;list-style:none}
+.modalBody li{margin:7px 0;background:rgba(47,179,171,.1);border-left:5px solid var(--teal);border-radius:0 10px 10px 0;padding:7px 10px}
+.modalBody li b{color:var(--redDark)}
+.modalBody p b{color:var(--redDark)}
+/* settings rows */
+.setRow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(201,169,120,.18);border:3px solid var(--tan);border-radius:14px;padding:10px 14px;margin:10px 0}
+.setRow .lbl{font-weight:900}
+.setRow .sub{display:block;font-weight:normal;font-size:11px;color:#6b5b45}
+.segs{display:flex;gap:6px}
+.seg{padding:7px 12px;font-size:12px;border-radius:10px}
+.seg.on{background:var(--teal);color:#fff}
+
+/* ============ IN-GAME HUD ============ */
+.hud{position:fixed;pointer-events:none;color:var(--cream);z-index:10}
+#topbar{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 14px;font-weight:bold}
+#topbar .box{background:linear-gradient(180deg, rgba(58,32,18,.92), rgba(43,25,14,.92));border:3px solid var(--tan);border-radius:14px;padding:6px 14px;font-size:14px;letter-spacing:.5px;box-shadow:0 4px 0 rgba(43,33,24,.6)}
+#scorebox b{color:var(--glow);font-size:19px}
+#floorbox b{color:var(--teal);font-size:19px}
+#timerbox{display:none}
+#timerbox b{color:var(--orange);font-size:19px}
+#modbar{position:fixed;top:58px;right:14px;z-index:10;display:flex;flex-direction:column;gap:5px;align-items:flex-end;pointer-events:none}
+.modchip{background:rgba(58,32,18,.92);border:3px solid var(--glow);color:var(--glow);border-radius:10px;padding:4px 9px;font-size:11px;font-weight:900;box-shadow:0 3px 0 rgba(43,33,24,.6)}
+#tray{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;gap:8px;justify-content:center;align-items:flex-end;padding:10px;flex-wrap:wrap}
+.trayItem{pointer-events:auto;background:var(--cream);border:4px solid var(--ink);border-radius:14px;color:var(--ink);padding:8px 10px;min-width:78px;text-align:center;cursor:pointer;font-size:11px;font-weight:900;box-shadow:0 5px 0 var(--ink);transition:transform .08s}
+.trayItem:hover{transform:translateY(-3px)}
+.trayItem .glyph{font-size:26px;display:block;margin-bottom:2px}
+.trayItem.sel{border-color:var(--red);background:#ffd9c4;transform:translateY(-6px) rotate(-2deg)}
+#rotBtns{display:none;gap:6px}
+.rotBtn{pointer-events:auto;background:var(--teal);color:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 4px 0 var(--ink)}
+.rotBtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+#goBtn{pointer-events:auto;display:none;font-size:19px;padding:12px 30px;background:var(--red);color:var(--cream);border:4px solid var(--ink);border-radius:16px;font-weight:900;letter-spacing:1px;cursor:pointer;box-shadow:0 6px 0 var(--ink);text-shadow:1px 1px 0 var(--ink)}
+#goBtn:hover{transform:translateY(-3px)}
+#goBtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+#hint{position:fixed;bottom:98px;left:0;right:0;text-align:center;color:var(--cream);font-size:12px;font-weight:bold;text-shadow:0 2px 3px rgba(20,10,5,.8);z-index:9;pointer-events:none;padding:0 20px}
+#resetBtn{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:11;background:rgba(58,32,18,.7);border:2px solid var(--tan);border-radius:10px;color:var(--cream);font-size:11px;cursor:pointer;letter-spacing:1px;display:none;padding:4px 10px;font-weight:bold}
+
+/* draft + result share warm translucent gradient */
+.overlay{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:16px;
+  background:radial-gradient(ellipse at 50% 35%, rgba(255,150,70,.3), rgba(45,25,13,.84))}
+.overlay h1{margin:0 0 6px;font-family:"Arial Black","Trebuchet MS",sans-serif;font-size:clamp(30px,7vw,58px);color:var(--glow);letter-spacing:2px;transform:rotate(-2deg);text-shadow:3px 3px 0 var(--ink),6px 6px 0 rgba(43,33,24,.35)}
+#cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.card{width:min(184px,28vw);min-width:152px;background:linear-gradient(165deg,var(--paper),#eddcbb);color:var(--ink);border:4px solid var(--ink);border-radius:18px;padding:12px 10px;cursor:pointer;box-shadow:0 8px 0 var(--ink);transition:transform .12s}
+.card:hover{transform:translateY(-8px) rotate(-1.5deg);border-color:var(--red)}
+.card:active{transform:translateY(0)}
+.card .kind{font-size:10px;font-weight:900;letter-spacing:1px;color:#fff;background:var(--teal);border-radius:8px;padding:3px 8px;display:inline-block;border:2px solid var(--ink)}
+.card .kind.mod{background:var(--glow);color:var(--ink)}
+.card .glyph{font-size:46px;margin:10px 0 6px;filter:drop-shadow(2px 3px 0 rgba(43,33,24,.3))}
+.card .name{font-weight:900;font-size:14px;margin-bottom:6px}
+.card .desc{font-size:11px;line-height:1.35;color:#5b4c39}
+.statline{font-size:15px;margin:6px 0;color:var(--cream);font-weight:bold;text-shadow:1px 1px 0 rgba(43,33,24,.6)}
+.statline b{color:var(--glow)}
+#resultBtn{margin-top:20px;font-size:18px;padding:13px 34px;background:var(--teal);color:#fff;text-shadow:1px 1px 0 var(--ink)}
+
+@media (max-width:760px){
+  #menuOverlay{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  #menuNav{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border-right:none;border-bottom:5px solid var(--ink)}
+  #logoH{font-size:26px;width:100%;text-align:center}
+  #tagH{display:none}
+  .navbtn{padding:9px 12px;font-size:13px;flex:1}
+  #bestChip{margin-top:0;flex:1;padding:6px}
+  #footNote{display:none}
+  #startBtn{padding:14px 44px}
+}
+@media (max-height:520px){ #hint{display:none} .trayItem{min-width:60px;font-size:10px} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="dev"></div>
+
+<!-- ============ MAIN MENU ============ -->
+<div id="menuOverlay">
+  <div id="menuNav">
+    <h1 id="logoH">BUTTERFLY<br><span>CHAOS</span></h1>
+    <div id="tagH"></div>
+    <button class="btn navbtn" id="navPlay"><span class="ic">🎮</span><span id="navPlayT"></span></button>
+    <button class="btn navbtn" id="navHow"><span class="ic">📖</span><span id="navHowT"></span></button>
+    <button class="btn navbtn" id="navSettings"><span class="ic">⚙️</span><span id="navSettingsT"></span></button>
+    <div id="bestChip"><span id="bestLbl"></span><b id="bestVal">0</b></div>
+    <div id="footNote">v2 · physics chain-reaction roguelike</div>
+  </div>
+  <div id="menuStage">
+    <div id="custPanel">
+      <div id="custTitle"></div>
+      <div id="custRow"></div>
+    </div>
+    <button class="btn" id="startBtn"></button>
+  </div>
+</div>
+
+<!-- ============ HOW TO PLAY ============ -->
+<div class="modalWrap" id="howModal">
+  <div class="modal">
+    <div class="modalHead"><h2>📖 HOW TO PLAY</h2><button class="btn modalClose" data-close="howModal">✕</button></div>
+    <div class="modalBody">
+      <h3>🎮 The Core Loop</h3>
+      <p>You have one goal: Cause maximum destruction before the 30-second timer runs out. You will draft powers, set up your room in frozen time, and then hit <b>GO</b> to unleash physics-based chaos!</p>
+      <h3>🛠️ Your Arsenal (Items)</h3>
+      <ul>
+        <li><b>🎳 Bowling Ball:</b> Heavy and frictionless. Plows through walls.</li>
+        <li><b>🚗 RC Rocket Car:</b> Drives straight and explodes on impact.</li>
+        <li><b>🧲 Singularity Magnet:</b> Pulls all nearby metal objects toward it.</li>
+        <li><b>🛢️ Unstable Keg:</b> Flies erratically like a balloon before detonating.</li>
+      </ul>
+      <h3>✨ Global Modifiers</h3>
+      <p>During the Draft phase, you might pull a modifier card that changes the entire room's rules:</p>
+      <ul>
+        <li><b>🪐 Micro-Gravity:</b> Objects float gracefully through the air.</li>
+        <li><b>🧊 Zero Friction:</b> The floor becomes a slip-and-slide of doom.</li>
+        <li><b>💥 Michael Bay Protocol:</b> EVERY single broken object triggers a secondary explosion.</li>
+      </ul>
+      <h3>🕹️ Controls</h3>
+      <ul>
+        <li><b>🖱️ Desktop:</b> Drag to orbit · Wheel to zoom · Click a tray item, then click any surface to place it · <b>R</b> rotates · <b>Space</b> = GO.</li>
+        <li><b>📱 Touch:</b> Drag to orbit · Pinch to zoom · Tap tray item, then tap a surface.</li>
+        <li><b>🎮 Gamepad:</b> Right stick orbits · <b>A</b> places at the crosshair · <b>B</b> picks up · <b>X</b> rotates · <b>Start</b> = GO.</li>
+      </ul>
+      <h3>🏆 Winning a Floor</h3>
+      <p>Every smashed plate, exploded keg and shattered monitor scores points. Beat the <b>TARGET</b> to clear the floor and draft a new power. Miss it? Your items stay <b>exactly where you placed them</b> — tweak the setup and try again!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="modalWrap" id="settingsModal">
+  <div class="modal">
+    <div class="modalHead"><h2>⚙️ SETTINGS</h2><button class="btn modalClose" data-close="settingsModal">✕</button></div>
+    <div class="modalBody">
+      <div class="setRow"><span class="lbl" id="setShakeL"></span>
+        <div class="segs"><button class="btn seg" id="shakeOn"></button><button class="btn seg" id="shakeOff"></button></div>
+      </div>
+      <div class="setRow"><span class="lbl" id="setPartL"></span>
+        <div class="segs"><button class="btn seg" id="partHi"></button><button class="btn seg" id="partLo"></button></div>
+      </div>
+      <div class="setRow"><span class="lbl" id="setResL"><span class="sub" id="setResSub"></span></span>
+        <div class="segs"><button class="btn seg" id="resHi"></button><button class="btn seg" id="resLo"></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ IN-GAME HUD ============ -->
+<div class="hud" id="topbar">
+  <div class="box" id="floorbox"></div>
+  <div class="box" id="timerbox"></div>
+  <div class="box" id="scorebox"></div>
+</div>
+<div id="modbar"></div>
+<div id="hint"></div>
+<button id="resetBtn"></button>
+<div id="tray"></div>
+
+<div class="overlay" id="draftOverlay">
+  <h1 id="draftH"></h1>
+  <div id="cards"></div>
+</div>
+
+<div class="overlay" id="resultOverlay">
+  <h1 id="resultH"></h1>
+  <div id="resultStats"></div>
+  <button class="btn" id="resultBtn"></button>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>
