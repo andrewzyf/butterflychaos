@@ -6,8 +6,8 @@
 // with hot orange-yellow glow, bright cheerful daylight with a mischievous toybox mood, high
 // contrast between interactive elements and backgrounds, clean readable silhouettes,
 // consistent three-quarter isometric presentation across all assets
-import * as THREE from "./vendor/three.module.js";
-import * as CANNON from "./vendor/cannon-es.js";
+import * as THREE from "./three.module.js";
+import * as CANNON from "./cannon-es.js";
 import { STR } from "./strings.js";
 
 // ---------- seeded RNG ----------
